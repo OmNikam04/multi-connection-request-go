@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment: 
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: mydb
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+  server:
+    container_name: myserver
+    image: cosmtrek/air:latest
+    working_dir: /go/src/bouncer/test
+    command: air -c ./.air.toml
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/go/src/bouncer/test
+    depends_on:
+      - "postgres"
+
+  worker1:
+    container_name: worker1
+    image: cosmtrek/air:latest  
+    working_dir: /go/src/bouncer/test
+    command: air -c ./.air.toml 
+    volumes:
+      - ./:/go/src/bouncer/test
+    depends_on:
+      - "postgres"
+
+  worker2:
+    container_name: worker2
+    image: cosmtrek/air:latest
+    working_dir: /go/src/bouncer/test
+    command: air -c ./.air.toml
+    volumes:
+      - ./:/go/src/bouncer/test
+    depends_on:
+      - "postgres"
+
+volumes: # create volume to persist the data
+  postgres-db:
